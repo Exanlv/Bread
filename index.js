@@ -106,7 +106,7 @@ breadBot.on('message', async (message) => {
 				break;
 				case 'me':
 					try {
-						await message.reply(`you currently have ${scores[message.guild.id][message.author.id]} bread`);
+						await message.reply(`you currently have ${scores[message.guild.id][message.author.id] || 0} bread`);
 					} catch (e) { }
 				break;
 			}
