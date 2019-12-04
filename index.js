@@ -88,6 +88,14 @@ breadBot.on('message', async (message) => {
 		return;
 	}
 
+	if (!scores[message.guild]) {
+		scores[message.guild] = {};
+	}
+
+	if (!scores[message.guild][message.author.id]) {
+		scores[message.guild][message.author.id] = 0;
+	}
+
 	if (message.author.id !== breadBot.user.id) {
 		let command = message.cleanContent.toLowerCase().split(' ');
 
@@ -106,7 +114,7 @@ breadBot.on('message', async (message) => {
 				break;
 				case 'me':
 					try {
-						await message.reply(`you currently have ${scores[message.guild.id][message.author.id] || 0} bread`);
+						await message.reply(`you currently have ${scores[message.guild.id][message.author.id]} bread`);
 					} catch (e) { }
 				break;
 			}
