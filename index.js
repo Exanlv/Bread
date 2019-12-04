@@ -7,6 +7,9 @@ let breadBot = new Discord.Client();
 
 const scores = {};
 
+if (!fs.existsSync('./data')) {
+	fs.mkdirSync('./data');
+}
 
 const servers = fs.readdirSync('./data/');
 
@@ -16,7 +19,7 @@ servers.forEach(serverId => {
 
 const timer = new TimingService.TimingService();
 
-timer.addEvent('s', 30, 'saveToDisk');
+timer.addEvent('m', 30, 'saveToDisk');
 
 timer.on('saveToDisk', () => {
 	for (let i in scores) {
@@ -28,18 +31,21 @@ breadBot.on('ready', () => {
 	console.log('Bot logged in');
 });
 
-const TIME_BEFORE_REACTION_COUNT = process.env.timebeforereactioncount //* 1000 * 60;
-leaderboardSlot = process.env.amountonleaderboard
+const TIME_BEFORE_REACTION_COUNT = process.env.timebeforereactioncount * 1000 * 60;
+const leaderboardSlot = process.env.amountonleaderboard
 
-function createLeaderBoard(json, message) {
-	leaderboard = new Discord.RichEmbed().setAuthor('The breadest of them all!', 'https://cdn.discordapp.com/attachments/651081524954923028/651890139173224488/bread.png', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-	var sortedArray = [];
+function createLeaderBoard(serverScores, message) {
+	let leaderboard = new Discord.RichEmbed().setAuthor(
+		'The breadest of them all!',
+		'https://cdn.discordapp.com/attachments/651081524954923028/651890139173224488/bread.png',
+		'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+	).setThumbnail('https://cdn.discordapp.com/attachments/651081524954923028/651890139173224488/bread.png');
 
-	for (var i in json) {
-		sortedArray.push([i, json[i]]);
+	let sortedArray = [];
+
+	for (let i in serverScores) {
+		sortedArray.push([i, serverScores[i]]);
 	}
-
-	console.log(sortedArray)
 
 	if (sortedArray.length > 0) {
 		sortedArray = sortedArray.sort(function (a, b) { return b[1] - a[1] });
@@ -47,37 +53,30 @@ function createLeaderBoard(json, message) {
 		return "There aren't any points yet!"
 	}
 
-	if (leaderboardSlot > Object.keys(json).length) {
-		leaderboardSlot = Object.keys(json).length
+	if (leaderboardSlot > Object.keys(serverScores).length) {
+		leaderboardSlot = Object.keys(serverScores).length
+	}
+
+	const emoji = ['🥇', '🥈', '🥉']
+
+	while (emoji.length < process.env.amountonleaderboard) {
+		emoji.push(`${emoji.length + 1}th place`);
 	}
 
 	for (i = 0; i < leaderboardSlot; i++) {
-		userId = sortedArray[i][0];
-		breadPoints = sortedArray[i][1];
+		let userId = sortedArray[i][0];
+		let breadPoints = sortedArray[i][1];
 
 		let member = message.guild.members.find(u => u.id === userId);
 
-		console.log(i)
-		emoji = ['🥇', '🥈', '🥉']
+		let name = member ? member.displayName : 'Member has left the server';
 
-		if (i < 4) {
-			emoji = emoji[i]
-		} else {
-			emoji = 'in ' + i + 'th place'
-		}
-		console.log(emoji)
-		name = member.displayName;
-
-		leaderboard.addField(emoji, name, true);
+		leaderboard.addField(emoji[i], name, true);
 		leaderboard.addBlankField(true);
 		leaderboard.addField('With:', breadPoints + ' amount of bread', true)
-
-
 	}
 
 	return leaderboard
-
-
 };
 
 
@@ -85,38 +84,38 @@ function createLeaderBoard(json, message) {
 breadBot.on('error', (e) => { });
 
 breadBot.on('message', async (message) => {
-	if (!((message.channel.name && message.channel.name.toLowerCase().includes('bread')) || message.channel.name.toLowerCase().includes('🍞'))) {
+	if (!message.guild || !((message.channel.name && message.channel.name.toLowerCase().includes('bread')) || message.channel.name.toLowerCase().includes('🍞'))) {
 		return;
+	}
+
+	if (message.author.id !== breadBot.user.id) {
+		let command = message.cleanContent.toLowerCase().split(' ');
+
+		if (command[0] === '🍞') {
+			switch (command[1]) {
+				case 'help':
+					try {
+						await message.channel.send('**Commands:**\n`🍞 help` - Shows this menu\n`🍞 top` - Display the bread leaderboard\n`🍞 me` - Display the amount of bread you\'ve collected');
+					} catch (e) { }
+				break;
+				case undefined:
+				case 'top':
+					try {
+						await message.channel.send(createLeaderBoard(scores[message.guild.id], message));
+					} catch (e) { }
+				break;
+				case 'me':
+					try {
+						await message.reply(`you currently have ${scores[message.guild.id][message.author.id]} bread`);
+					} catch (e) { }
+				break;
+			}
+		}
 	}
 
 	const reactionToUse = (message.author.username.includes('🇫🇷') || (message.member.nickname && message.member.nickname.includes('🇫🇷'))) ? '🥖' : '🍞';
 
 	message.react(reactionToUse);
-
-
-
-
-
-
-
-	filter = (reaction, user) => {
-		return (reaction.emoji.name === '🍞' || reaction.emoji.name === '🥖')
-	};
-
-
-	if (message.author.id !== breadBot.user.id)
-		if (message.content.toLowerCase().startsWith('🍞board') || message.content.toLowerCase().startsWith('breadboard')) {
-			if (message.content.toLowerCase().includes('help')) {
-				messagecollection = true
-				message.channel.send("**b r e a d** \nPrints the amount of bread you have collected")
-			}
-			else {
-
-				message.channel.send(createLeaderBoard(scores[message.guild.id], message))
-
-
-			}
-		}
 
 	const reaction = (await message.awaitReactions((reaction, user) => reaction.emoji.name === reactionToUse, {
 		time: TIME_BEFORE_REACTION_COUNT
@@ -125,6 +124,7 @@ breadBot.on('message', async (message) => {
 	if (!scores[message.guild.id]) {
 		scores[message.guild.id] = {};
 	}
+
 	reaction.users.tap((user) => {
 		if (user.bot) {
 			return;
@@ -136,8 +136,6 @@ breadBot.on('message', async (message) => {
 
 		scores[message.guild.id][user.id]++;
 	});
-
 });
-
 
 breadBot.login(process.env.discord_token)
