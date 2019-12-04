@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/Exanlv/Bread#readme",
   "dependencies": {
+    "@exan/envreader": "^1.0.4",
+    "@exan/timing-service": "^1.0.1",
     "discord.js": "^11.5.1"
   }
 }
