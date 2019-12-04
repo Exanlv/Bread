@@ -19,7 +19,7 @@ servers.forEach(serverId => {
 
 const timer = new TimingService.TimingService();
 
-timer.addEvent('m', 30, 'saveToDisk');
+timer.addEvent('s', 10, 'saveToDisk');
 
 timer.on('saveToDisk', () => {
 	for (let i in scores) {
@@ -88,12 +88,12 @@ breadBot.on('message', async (message) => {
 		return;
 	}
 
-	if (!scores[message.guild]) {
-		scores[message.guild] = {};
+	if (!scores[message.guild.id]) {
+		scores[message.guild.id] = {};
 	}
 
-	if (!scores[message.guild][message.author.id]) {
-		scores[message.guild][message.author.id] = 0;
+	if (!scores[message.guild.id][message.author.id]) {
+		scores[message.guild.id][message.author.id] = 0;
 	}
 
 	if (message.author.id !== breadBot.user.id) {
