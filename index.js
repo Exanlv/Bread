@@ -124,26 +124,73 @@ breadBot.on('message', async (message) => {
 	const reactionToUse = (message.author.username.includes('🇫🇷') || (message.member.nickname && message.member.nickname.includes('🇫🇷'))) ? '🥖' : '🍞';
 
 	message.react(reactionToUse);
+});
 
-	const reaction = (await message.awaitReactions((reaction, user) => reaction.emoji.name === reactionToUse, {
-		time: TIME_BEFORE_REACTION_COUNT
-	})).first();
+const events = {
+	MESSAGE_REACTION_ADD: 'breadAdd',
+	MESSAGE_REACTION_REMOVE: 'breadRemove',
+};
 
-	if (!scores[message.guild.id]) {
-		scores[message.guild.id] = {};
+breadBot.on('raw', async (event) => {
+	if (!events.hasOwnProperty(event.t)) { return; }
+
+	if (!event.d.channel_id) {
+		return;
 	}
 
-	reaction.users.tap((user) => {
-		if (user.bot) {
-			return;
-		}
+	if (event.d.user_id === breadBot.user.id) {
+		return;
+	}
 
-		if (!scores[message.guild.id][user.id]) {
-			scores[message.guild.id][user.id] = 0;
-		}
+	const identifier = event.d.emoji.id ? `${event.d.emoji.name.split('~')[0]}:${event.d.emoji.id}` : event.d.emoji.name;
+	const whitelist = ['🍞', '🥖'];
 
-		scores[message.guild.id][user.id]++;
-	});
+	if (!whitelist.includes(identifier)) {
+		return;
+	}
+
+	let channel = breadBot.channels.find(c => c.id === event.d.channel_id);
+
+	if (!channel || (!channel.name.toLowerCase().includes('bread') && !channel.name.includes('🍞'))) {
+		return;
+	}
+
+	let message = await channel.fetchMessage(event.d.message_id);
+
+	if ((message.createdTimestamp + TIME_BEFORE_REACTION_COUNT) < new Date().getTime()) {
+		return;
+	}
+
+	const shortReact = {};
+
+	shortReact.guildId = event.d.guild_id;
+	shortReact.userId = event.d.user_id;
+
+	breadBot.emit(events[event.t], shortReact);
+});
+
+breadBot.on('breadAdd', (shortReact) => {
+	if (!scores[shortReact.guildId]) {
+		scores[shortReact.guildId] = {};
+	}
+
+	if (!scores[shortReact.guildId][shortReact.userId]) {
+		scores[shortReact.guildId][shortReact.userId] = 0;
+	}
+	
+	scores[shortReact.guildId][shortReact.userId]++;
+});
+
+breadBot.on('breadRemove', (shortReact) => {
+	if (!scores[shortReact.guildId]) {
+		scores[shortReact.guildId] = {};
+	}
+
+	if (!scores[shortReact.guildId][shortReact.userId]) {
+		scores[shortReact.guildId][shortReact.userId] = 0;
+	}
+	
+	scores[shortReact.guildId][shortReact.userId]--;
 });
 
 breadBot.login(process.env.discord_token)
