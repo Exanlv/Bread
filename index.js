@@ -19,7 +19,7 @@ servers.forEach(serverId => {
 
 const timer = new TimingService.TimingService();
 
-timer.addEvent('s', 10, 'saveToDisk');
+timer.addEvent('m', 30, 'saveToDisk');
 
 timer.on('saveToDisk', () => {
 	for (let i in scores) {
@@ -35,6 +35,8 @@ const TIME_BEFORE_REACTION_COUNT = process.env.timebeforereactioncount * 1000 * 
 const leaderboardSlot = process.env.amountonleaderboard
 
 function createLeaderBoard(serverScores, message) {
+	let leaderboardSpots = leaderboardSlot;
+
 	let leaderboard = new Discord.RichEmbed().setAuthor(
 		'The breadest of them all!',
 		'https://cdn.discordapp.com/attachments/651081524954923028/651890139173224488/bread.png',
@@ -53,8 +55,8 @@ function createLeaderBoard(serverScores, message) {
 		return "There aren't any points yet!"
 	}
 
-	if (leaderboardSlot > Object.keys(serverScores).length) {
-		leaderboardSlot = Object.keys(serverScores).length
+	if (leaderboardSpots > Object.keys(serverScores).length) {
+		leaderboardSpots = Object.keys(serverScores).length
 	}
 
 	const emoji = ['🥇', '🥈', '🥉']
@@ -63,7 +65,7 @@ function createLeaderBoard(serverScores, message) {
 		emoji.push(`${emoji.length + 1}th place`);
 	}
 
-	for (i = 0; i < leaderboardSlot; i++) {
+	for (i = 0; i < leaderboardSpots; i++) {
 		let userId = sortedArray[i][0];
 		let breadPoints = sortedArray[i][1];
 
@@ -73,7 +75,7 @@ function createLeaderBoard(serverScores, message) {
 
 		leaderboard.addField(emoji[i], name, true);
 		leaderboard.addBlankField(true);
-		leaderboard.addField('With:', breadPoints + ' amount of bread', true)
+		leaderboard.addField('With:', breadPoints + ' bread', true)
 	}
 
 	return leaderboard
@@ -143,21 +145,22 @@ breadBot.on('raw', async (event) => {
 	}
 
 	const identifier = event.d.emoji.id ? `${event.d.emoji.name.split('~')[0]}:${event.d.emoji.id}` : event.d.emoji.name;
-	const whitelist = ['🍞', '🥖'];
 
-	if (!whitelist.includes(identifier)) {
-		return;
-	}
-
-	let channel = breadBot.channels.find(c => c.id === event.d.channel_id);
+	const channel = breadBot.channels.find(c => c.id === event.d.channel_id);
 
 	if (!channel || (!channel.name.toLowerCase().includes('bread') && !channel.name.includes('🍞'))) {
 		return;
 	}
 
-	let message = await channel.fetchMessage(event.d.message_id);
+	const message = await channel.fetchMessage(event.d.message_id);
 
 	if ((message.createdTimestamp + TIME_BEFORE_REACTION_COUNT) < new Date().getTime()) {
+		return;
+	}
+
+	const messageReaction = message.reactions.find(mr => (mr.emoji.id || mr.emoji.name) === identifier);
+
+	if (!messageReaction.users.find(u => u.id === breadBot.user.id)) {
 		return;
 	}
 
