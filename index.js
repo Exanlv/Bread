@@ -105,7 +105,7 @@ breadBot.on('message', async (message) => {
 			switch (command[1]) {
 				case 'help':
 					try {
-						await message.channel.send('**Commands:**\n`🍞 help` - Shows this menu\n`🍞 top` - Display the bread leaderboard\n`🍞 me` - Display the amount of bread you\'ve collected');
+						await message.channel.send('**Commands:**\n`🍞 help` - Shows this menu\n`🍞 top` - Display the bread leaderboard\n`🍞 me` - Display the amount of bread you\'ve collected\n`🍞 gamble %amount%` - Waste away your life savings');
 					} catch (e) { }
 				break;
 				case undefined:
