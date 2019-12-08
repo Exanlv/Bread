@@ -119,6 +119,30 @@ breadBot.on('message', async (message) => {
 						await message.reply(`you currently have ${scores[message.guild.id][message.author.id]} bread`);
 					} catch (e) { }
 				break;
+				case 'gamble':
+					if (!command[2]) {
+						try {
+							await message.reply('specify how much bread you want to gamble');
+						} catch (e) { }
+					} else {
+						const gambleAmount = Number(command[2]);
+
+						if (isNaN(gambleAmount)) {
+							await message.reply('invalid amount');
+						} else if (gambleAmount > scores[message.guild.id][message.author.id]) {
+							await message.reply('you dont have this much bread');
+						} else {
+							const outcome = (Math.random() <= 0.5);
+							if (outcome) {
+								scores[message.guild.id][message.author.id] += gambleAmount;
+								await message.reply(`you won! You now have ${scores[message.guild.id][message.author.id]} bread!`);
+							} else {
+								scores[message.guild.id][message.author.id] -= gambleAmount;
+								await message.reply(`you lost! You now have ${scores[message.guild.id][message.author.id]} bread!`);
+							}
+						}
+					}
+				break;
 			}
 		}
 	}
