@@ -34,8 +34,11 @@ breadBot.on('ready', () => {
 const TIME_BEFORE_REACTION_COUNT = process.env.timebeforereactioncount * 1000 * 60;
 const leaderboardSlot = process.env.amountonleaderboard
 
-function createLeaderBoard(serverScores, message) {
-	let leaderboardSpots = leaderboardSlot;
+
+
+function createLeaderBoard(serverScores, message, slots = leaderboardSlot) {
+	slots = slots > 20 ? slots = 20 : slots;
+	let leaderboardSpots = slots;
 
 	let leaderboard = new Discord.RichEmbed().setAuthor(
 		'The breadest of them all!',
@@ -61,11 +64,11 @@ function createLeaderBoard(serverScores, message) {
 
 	const emoji = ['🥇', '🥈', '🥉']
 
-	while (emoji.length < process.env.amountonleaderboard) {
+	while (emoji.length < leaderboardSlot) {
 		emoji.push(`${emoji.length + 1}th place`);
 	}
 
-	for (i = 0; i < leaderboardSpots; i++) {
+	for (let i = 0; i < leaderboardSpots; i++) {
 		let userId = sortedArray[i][0];
 		let breadPoints = sortedArray[i][1];
 
@@ -74,18 +77,129 @@ function createLeaderBoard(serverScores, message) {
 		let name = member ? member.displayName : 'Member has left the server';
 
 		leaderboard.addField(emoji[i], name, true);
+		leaderboard.addField('With:', breadPoints + ' bread', true);
 		leaderboard.addBlankField(true);
-		leaderboard.addField('With:', breadPoints + ' bread', true)
 	}
 
 	return leaderboard
 };
+
+function wherePlain(serverScores, message) {
+	let sortedArray = [];
+	let breadPoints = scores[message.guild.id][message.author.id]
+
+	for (let i in serverScores) {
+		sortedArray.push([i, serverScores[i]]);
+	}
+
+	if (sortedArray.length > 0) {
+		sortedArray = sortedArray.sort(function (a, b) { return b[1] - a[1] });
+	} else {
+		return "There aren't any points yet!"
+	}
+
+	searcharg = [[message.author.id, scores[message.guild.id][message.author.id]]]
+
+
+	let position = 0
+
+	for (let i = 0; i < sortedArray.length; i++) {
+		if (sortedArray[i].toString() == searcharg.toString()) {
+			position = i
+		}
+	}
+
+	const emoji = ['🥇', '🥈', '🥉',]
+
+	while (emoji.length < position + 1) {
+		emoji.push(`${emoji.length + 1}th place`);
+	}
+
+	return `You have ${breadPoints} bread, which makes you ${emoji[position]}`
+
+
+}
+
+
+
+function where(serverScores, message, mentioned = false) {
+	let leaderboard = new Discord.RichEmbed().setAuthor(
+		'The breadest of them all!',
+		'https://cdn.discordapp.com/attachments/651081524954923028/651890139173224488/bread.png',
+		'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+	)
+
+	let sortedArray = [];
+
+
+	for (let i in serverScores) {
+		sortedArray.push([i, serverScores[i]]);
+	}
+
+	if (sortedArray.length > 0) {
+		sortedArray = sortedArray.sort(function (a, b) { return b[1] - a[1] });
+	} else {
+		return "There aren't any points yet!"
+	}
+
+
+
+	let searcharg = []
+
+	if (mentioned) {
+		let mentionedUsers = message.mentions.users.array()
+		if (mentionedUsers.length > 8) {
+			return "That\'s way too many people"
+		}
+		for (let i = 0; i < mentionedUsers.length; i++) {
+			searcharg.push([mentionedUsers[i].id, scores[message.guild.id][mentionedUsers[i].id]])
+			if (searcharg[i][1] === undefined) {
+				scores[message.guild.id][mentionedUsers[i].id] = 0
+				searcharg[i][1] = 0
+			}
+		}
+	} else { searcharg = [[message.author.id, scores[message.guild.id][message.author.id]]] }
+
+	if (searcharg.length > 0) {
+		searcharg = searcharg.sort(function (a, b) { return b[1] - a[1] });
+	} else {
+		return "User was not found"
+	}
+
+
+
+
+	for (let k = 0; k < searcharg.length; k++) {
+		let breadPoints = searcharg[k][1]
+		let position = 0
+
+		for (let i = 0; i < sortedArray.length; i++) {
+			if (sortedArray[i].toString() == searcharg[k].toString()) {
+				position = i
+			}
+		}
+
+		const emoji = ['🥇', '🥈', '🥉',]
+
+		while (emoji.length < position + 1) {
+			emoji.push(`${emoji.length + 1}th place`);
+		}
+
+		let member = message.guild.members.find(u => u.id === searcharg[k][0]);
+		let name = member ? member.displayName : 'Member has left the server'
+		leaderboard.addField(emoji[position], name, true);
+		leaderboard.addField('With:', breadPoints + ' bread', true);
+		leaderboard.addBlankField(true);
+	}
+	return leaderboard
+}
 
 
 
 breadBot.on('error', (e) => { });
 
 breadBot.on('message', async (message) => {
+
 	if (!message.guild || !((message.channel.name && message.channel.name.toLowerCase().includes('bread')) || message.channel.name.toLowerCase().includes('🍞'))) {
 		return;
 	}
@@ -105,21 +219,39 @@ breadBot.on('message', async (message) => {
 			switch (command[1]) {
 				case 'help':
 					try {
-						await message.channel.send('**Commands:**\n`🍞 help` - Shows this menu\n`🍞 top` - Display the bread leaderboard\n`🍞 me` - Display the amount of bread you\'ve collected');
+						await message.channel.send('**Commands:**\n`🍞 ` - Displayes the B R E A D L E A D E R B O A R D\n`🍞 help` - Shows this menu\n`🍞 top` - Display the bread leaderboard. You can specify how many people you would like to see\n`🍞 me` - Display the amount of bread you\'ve collected and your position\n`🍞 position` - Shows your current position in a leaderboard style or the mentioned user(s)\n`🍞 @` - Shows the mentioned user(s) on the leaderboard ');
 					} catch (e) { }
-				break;
+					break;
 				case undefined:
 				case 'top':
 					try {
-						await message.channel.send(createLeaderBoard(scores[message.guild.id], message));
+						if (!command[2]) {
+							await message.channel.send(createLeaderBoard(scores[message.guild.id], message));
+						} else {
+							await message.channel.send(createLeaderBoard(scores[message.guild.id], message, command[2]));
+						}
 					} catch (e) { }
-				break;
+					break;
 				case 'me':
 					try {
-						await message.reply(`you currently have ${scores[message.guild.id][message.author.id]} bread`);
+						await message.reply(wherePlain(scores[message.guild.id], message));
 					} catch (e) { }
-				break;
+					break;
+				case 'position':
+					try {
+						if (command[2] && command[2].includes('@')) {
+							await message.channel.send(where(scores[message.guild.id], message, true));
+						} else { await message.channel.send(where(scores[message.guild.id], message)); }
+					} catch (e) { }
+					break
 			}
+
+			try {
+				if (command[1].includes('@')) {
+					await message.channel.send(where(scores[message.guild.id], message, true));
+				}
+			} catch (e) { }
+
 		}
 	}
 
@@ -180,7 +312,7 @@ breadBot.on('breadAdd', (shortReact) => {
 	if (!scores[shortReact.guildId][shortReact.userId]) {
 		scores[shortReact.guildId][shortReact.userId] = 0;
 	}
-	
+
 	scores[shortReact.guildId][shortReact.userId]++;
 });
 
@@ -192,7 +324,7 @@ breadBot.on('breadRemove', (shortReact) => {
 	if (!scores[shortReact.guildId][shortReact.userId]) {
 		scores[shortReact.guildId][shortReact.userId] = 0;
 	}
-	
+
 	scores[shortReact.guildId][shortReact.userId]--;
 });
 
