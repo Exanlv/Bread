@@ -148,7 +148,7 @@ breadBot.on('message', async (message) => {
 						await message.channel.send(
 							'**Data stored**\n'
 							+ 'The only data Bread (this bot) collects is how much bread (points) you have collected. '
-							+ 'This data is not shared with a third party. '
+							+ 'This data is not shared with a third party.\n\n'
 							+ '**Data removal**\n'
 							+ 'This data is not removed when you leave the guild you collected the bread on. '
 							+ 'If your points ever show up in the leaderboard, the username displayed will be `Member has left the server`.\n\n'
