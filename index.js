@@ -153,7 +153,7 @@ breadBot.on('message', async (message) => {
 							+ 'This data is not removed when you leave the guild you collected the bread on. '
 							+ 'If your points ever show up in the leaderboard, the username displayed will be `Member has left the server`.\n\n'
 							+ 'If you have any concerns and/or further questions, or want your data removed, contact me (bot owner/creator) on Github. https://github.com/Exanlv/Bread\n\n'
-							+ '**Third partiy involvement**\n'
+							+ '**Third party involvement**\n'
 							+ 'This bot is hosted on a Scaleway VPS. '
 							+ 'Their privacy policy may apply.\n\n'
 							+ 'If requested by law enforcement, your bread scores will not be given up voluntarily.');
