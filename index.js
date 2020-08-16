@@ -148,10 +148,12 @@ breadBot.on('message', async (message) => {
 						await message.channel.send(
 							'**Data stored**\n'
 							+ 'The only data Bread (this bot) collects is how much bread (points) you have collected. '
-							+ 'This data is not stored with a third party. '
+							+ 'This data is not shared with a third party. '
+							+ '**Data removal**\n'
 							+ 'This data is not removed when you leave the guild you collected the bread on. '
 							+ 'If your points ever show up in the leaderboard, the username displayed will be `Member has left the server`.\n\n'
-							+ 'If you have any concerns and/or further questions, contact me (bot owner/creator) on Github. https://github.com/Exanlv/Bread\n\n'
+							+ 'If you have any concerns and/or further questions, or want your data removed, contact me (bot owner/creator) on Github. https://github.com/Exanlv/Bread\n\n'
+							+ '**Third partiy involvement**\n'
 							+ 'This bot is hosted on a Scaleway VPS. '
 							+ 'Their privacy policy may apply.\n\n'
 							+ 'If requested by law enforcement, your bread scores will not be given up voluntarily.');
