@@ -105,7 +105,7 @@ breadBot.on('message', async (message) => {
 			switch (command[1]) {
 				case 'help':
 					try {
-						await message.channel.send('**Commands:**\n`🍞 help` - Shows this menu\n`🍞 top` - Display the bread leaderboard\n`🍞 me` - Display the amount of bread you\'ve collected\n`🍞 gamble %amount%` - Waste away your life savings\n`🍞 privacy` - Privacy policy');
+						await message.channel.send('**Commands:**\n`🍞 help` - Shows this menu\n`🍞 invite` - Invite Bread to a different server\n`🍞 top` - Display the bread leaderboard\n`🍞 me` - Display the amount of bread you\'ve collected\n`🍞 gamble %amount%` - Waste away your life savings\n`🍞 privacy` - Privacy policy');
 					} catch (e) { }
 				break;
 				case undefined:
@@ -157,6 +157,11 @@ breadBot.on('message', async (message) => {
 							+ 'This bot is hosted on a Scaleway VPS. '
 							+ 'Their privacy policy may apply.\n\n'
 							+ 'If requested by law enforcement, your bread scores will not be given up voluntarily.');
+					} catch (e) { }
+				break;
+				case 'invite':
+					try {
+						await message.channel.send('https://discord.com/oauth2/authorize?client_id=634812523685609532&scope=bot&permissions=3136')
 					} catch (e) { }
 				break;
 			}
