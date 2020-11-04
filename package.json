@@ -20,6 +20,6 @@
   "dependencies": {
     "@exan/envreader": "^1.0.4",
     "@exan/timing-service": "^1.0.1",
-    "discord.js": "^11.5.1"
+    "discord.js": "^11.6.4"
   }
 }
