@@ -50,7 +50,7 @@ function createLeaderBoard(serverScores, message) {
 	}
 
 	if (sortedArray.length > 0) {
-		sortedArray = sortedArray.sort(function (a, b) { return b[1] - a[1] });
+		sortedArray = sortedArray.sort(function (a, b) { return !(b[1] - a[1]) });
 	} else {
 		return "There aren't any points yet!"
 	}
