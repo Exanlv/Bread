@@ -67,7 +67,7 @@ function createLeaderBoard(serverScores, message) {
 
 	for (i = 0; i < leaderboardSpots; i++) {
 		let userId = sortedArray[i][0];
-		let breadPoints = sortedArray[i][1];
+		let breadPoints = 0 - sortedArray[i][1];
 
 		let member = message.guild.members.find(u => u.id === userId);
 
@@ -116,7 +116,7 @@ breadBot.on('message', async (message) => {
 				break;
 				case 'me':
 					try {
-						await message.reply(`you currently have ${scores[message.guild.id][message.author.id]} bread`);
+						await message.reply(`you currently have ${0 - scores[message.guild.id][message.author.id]} bread`);
 					} catch (e) { }
 				break;
 				case 'gamble':
@@ -135,10 +135,10 @@ breadBot.on('message', async (message) => {
 							const outcome = (Math.random() <= 0.5);
 							if (outcome) {
 								scores[message.guild.id][message.author.id] += gambleAmount;
-								await message.reply(`you won! You now have ${scores[message.guild.id][message.author.id]} bread!`);
+								await message.reply(`you won! You now have ${0 - scores[message.guild.id][message.author.id]} bread!`);
 							} else {
 								scores[message.guild.id][message.author.id] -= gambleAmount;
-								await message.reply(`you lost! You now have ${scores[message.guild.id][message.author.id]} bread!`);
+								await message.reply(`you lost! You now have ${0 - scores[message.guild.id][message.author.id]} bread!`);
 							}
 						}
 					}
