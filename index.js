@@ -125,8 +125,15 @@ breadBot.on('message', async (message) => {
 							await message.reply('specify how much bread you want to gamble');
 						} catch (e) { }
 					} else {
-						const gambleAmount = Number(command[2]);
+						let gambleAmount = 0; 
 
+						if (command[2] === 'all')
+							gambleAmount = scores[message.guild.id][message.author.id];
+						else if (command[2] === 'half')
+							gambleAmount = Math.round(scores[message.guild.id][message.author.id] / 2);
+						else 
+							gambleAmount = Number(command[2]);
+						
 						if (isNaN(gambleAmount) || 0 > gambleAmount || Math.round(gambleAmount) !== gambleAmount) {
 							await message.reply('invalid amount');
 						} else if (gambleAmount > scores[message.guild.id][message.author.id]) {
