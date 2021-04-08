@@ -127,27 +127,33 @@ breadBot.on('message', async (message) => {
 					} else {
 						let gambleAmount = 0; 
 
-						if (command[2] === 'all')
+						if (command[2] === 'all') {
 							gambleAmount = scores[message.guild.id][message.author.id];
-						else if (command[2] === 'half')
+                        } else if (command[2] === 'half') {
 							gambleAmount = Math.round(scores[message.guild.id][message.author.id] / 2);
-						else 
+                        } else {
 							gambleAmount = Number(command[2]);
+
+                            if (isNaN(gambleAmount) || 0 > gambleAmount || Math.round(gambleAmount) !== gambleAmount) {
+                                await message.reply('invalid amount');
+
+                                return;
+                            } else if (gambleAmount > scores[message.guild.id][message.author.id]) {
+                                await message.reply('you dont have this much bread');
+
+                                return;
+                            }
+                        }
 						
-						if (isNaN(gambleAmount) || 0 > gambleAmount || Math.round(gambleAmount) !== gambleAmount) {
-							await message.reply('invalid amount');
-						} else if (gambleAmount > scores[message.guild.id][message.author.id]) {
-							await message.reply('you dont have this much bread');
-						} else {
-							const outcome = (Math.random() <= 0.5);
-							if (outcome) {
-								scores[message.guild.id][message.author.id] += gambleAmount;
-								await message.reply(`you won! You now have ${scores[message.guild.id][message.author.id]} bread!`);
-							} else {
-								scores[message.guild.id][message.author.id] -= gambleAmount;
-								await message.reply(`you lost! You now have ${scores[message.guild.id][message.author.id]} bread!`);
-							}
-						}
+                        const outcome = (Math.random() <= 0.5);
+                        
+                        if (outcome) {
+                            scores[message.guild.id][message.author.id] += gambleAmount;
+                            await message.reply(`you won! You now have ${scores[message.guild.id][message.author.id]} bread!`);
+                        } else {
+                            scores[message.guild.id][message.author.id] -= gambleAmount;
+                            await message.reply(`you lost! You now have ${scores[message.guild.id][message.author.id]} bread!`);
+                        }
 					}
 				break;
 				case 'privacy':
