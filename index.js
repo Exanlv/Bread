@@ -145,7 +145,7 @@ breadBot.on('message', async (message) => {
                             }
                         }
 						
-                        const outcome = (Math.random() <= 0.5);
+                        const outcome = (Math.random() <= 0.55);
                         
                         if (outcome) {
                             scores[message.guild.id][message.author.id] += gambleAmount;
