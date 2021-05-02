@@ -65,17 +65,29 @@ function createLeaderBoard(serverScores, message) {
 		emoji.push(`${emoji.length + 1}th place`);
 	}
 
-	for (i = 0; i < leaderboardSpots; i++) {
+    let addedMembers = 0;
+
+	for (let i in sortedArray) {
 		let userId = sortedArray[i][0];
 		let breadPoints = sortedArray[i][1];
 
 		let member = message.guild.members.find(u => u.id === userId);
 
-		let name = member ? member.displayName : 'Member has left the server';
+        if (!member) {
+            continue;
+        }
 
-		leaderboard.addField(emoji[i], name, true);
+        addedMembers++;
+
+		let name = member.displayName;
+
+		leaderboard.addField(emoji[addedMembers], name, true);
 		leaderboard.addBlankField(true);
 		leaderboard.addField('With:', breadPoints + ' bread', true)
+
+        if (addedMembers == leaderboardSpots) {
+            break;
+        }
 	}
 
 	return leaderboard
