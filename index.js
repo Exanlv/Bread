@@ -81,7 +81,7 @@ function createLeaderBoard(serverScores, message) {
 
 		let name = member.displayName;
 
-		leaderboard.addField(emoji[addedMembers], name, true);
+		leaderboard.addField(emoji[addedMembers - 1], name, true);
 		leaderboard.addBlankField(true);
 		leaderboard.addField('With:', breadPoints + ' bread', true)
 
